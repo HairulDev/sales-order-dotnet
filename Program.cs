@@ -6,29 +6,26 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<DbConnectionFactory>();
-builder.Services.AddScoped<SalesOrderService>();
+builder.Services.AddScoped<SalesOrderRepository>();
 
 
-// Add CORS policy to allow React app (or other frontend)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Replace with the URL of your frontend app
+        policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); // Allow cookies or auth tokens
+              .AllowCredentials();
     });
 });
 
-// Register DbConnectionFactory with a Scoped lifetime
 builder.Services.AddScoped<DbConnectionFactory>();
 
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -39,7 +36,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Use CORS with the defined policy
 app.UseCors("AllowReactApp");
 
 app.UseAuthorization();

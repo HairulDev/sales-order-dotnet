@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 [ApiController]
 public class SalesOrderController : ControllerBase
 {
-    private readonly SalesOrderService _salesOrderService;
+    private readonly SalesOrderRepository _salesOrderRepository;
 
-    public SalesOrderController(SalesOrderService salesOrderService)
+    public SalesOrderController(SalesOrderRepository salesOrderRepository)
     {
-        _salesOrderService = salesOrderService;
+        _salesOrderRepository = salesOrderRepository;
     }
 
     [HttpPost]
@@ -18,7 +18,7 @@ public class SalesOrderController : ControllerBase
     {
         try
         {
-            var result = await _salesOrderService.CreateSalesOrder(salesOrder);
+            var result = await _salesOrderRepository.CreateSalesOrder(salesOrder);
 
             if (!result)
             {
@@ -45,13 +45,12 @@ public class SalesOrderController : ControllerBase
         }
     }
 
-
     [HttpGet]
-    public async Task<IActionResult> GetSalesOrders()
+    public async Task<IActionResult> GetSalesOrders([FromQuery] int page = 1, int limit = 2)
     {
         try
         {
-            var salesOrders = await _salesOrderService.GetSalesOrders();
+            var salesOrders = await _salesOrderRepository.GetSalesOrders(page, limit);
             return Ok(new
             {
                 message = "Sales orders retrieved successfully",
@@ -69,12 +68,46 @@ public class SalesOrderController : ControllerBase
         }
     }
 
+    [HttpGet("{idOrder}")]
+    public async Task<IActionResult> GetSalesOrderById(string idOrder)
+    {
+        try
+        {
+            var salesOrder = await _salesOrderRepository.GetSalesOrderById(idOrder);
+
+            if (salesOrder == null)
+            {
+                return NotFound(new
+                {
+                    message = "Sales order not found",
+                    status = false
+                });
+            }
+
+            return Ok(new
+            {
+                message = "Sales order retrieved successfully",
+                status = true,
+                data = salesOrder
+            });
+        }
+        catch (System.Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                message = ex.Message,
+                status = false
+            });
+        }
+    }
+
+
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateSalesOrder(string id, [FromBody] SalesOrder updatedOrder)
     {
         try
         {
-            var result = await _salesOrderService.UpdateSalesOrder(id, updatedOrder);
+            var result = await _salesOrderRepository.UpdateSalesOrder(id, updatedOrder);
 
             if (!result)
             {
@@ -106,7 +139,7 @@ public class SalesOrderController : ControllerBase
     {
         try
         {
-            var result = await _salesOrderService.DeleteSalesOrder(id);
+            var result = await _salesOrderRepository.DeleteSalesOrder(id);
 
             if (!result)
             {
@@ -136,12 +169,14 @@ public class SalesOrderController : ControllerBase
 
     [HttpGet("search")]
     public async Task<IActionResult> SearchSalesOrders(
-    [FromQuery] string? keywords,
-    [FromQuery] DateTime? date)
+        [FromQuery] string? keywords,
+        [FromQuery] DateTime? date,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 2)
     {
         try
         {
-            var salesOrders = await _salesOrderService.SearchSalesOrders(keywords, date);
+            var salesOrders = await _salesOrderRepository.SearchSalesOrders(keywords, date, page, pageSize);
 
             return Ok(new
             {
