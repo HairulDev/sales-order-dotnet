@@ -1,5 +1,5 @@
 CREATE TABLE SalesOrder (
-    id_order NVARCHAR(50),
+    id_order NVARCHAR(50) PRIMARY KEY,
     number_order NVARCHAR(50) NOT NULL,
     date DATE NOT NULL,
     customer NVARCHAR(100),
@@ -7,8 +7,8 @@ CREATE TABLE SalesOrder (
 );
 
 CREATE TABLE ItemOrder (
-    id_item NVARCHAR(50),
-    id_order NVARCHAR(50),
+    id_item NVARCHAR(50) NOT NULL,
+    id_order NVARCHAR(50) NOT NULL,
     item_name NVARCHAR(100),
     qty INT NOT NULL,
     price DECIMAL(18, 2) NOT NULL,
